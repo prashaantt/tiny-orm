@@ -1,0 +1,20 @@
+{
+  "name": "tiny-orm",
+  "version": "0.1.0",
+  "description": "A super tiny ORM for TypeScript",
+  "main": "index.js",
+  "repository": "https://github.com/prashaantt/tiny-orm.git",
+  "author": "Prashant Tiwari <prashaantt@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "change-case": "^3.0.0",
+    "joi": "^10.1.0"
+  },
+  "devDependencies": {
+    "@types/code": "^4.0.0",
+    "@types/joi": "^10.0.0",
+    "@types/lab": "^11.1.0",
+    "code": "^4.0.0",
+    "lab": "^11.2.1"
+  }
+}
