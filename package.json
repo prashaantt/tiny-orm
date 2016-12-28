@@ -15,6 +15,11 @@
     "@types/joi": "^10.0.0",
     "@types/lab": "^11.1.0",
     "code": "^4.0.0",
-    "lab": "^11.2.1"
+    "lab": "^11.2.1",
+    "typescript": "^2.1.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "lab -T test/test-transform.js"
   }
 }

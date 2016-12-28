@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Test",
+            "type": "node2",
+            "request": "launch",
+            "program": "${workspaceRoot}/node_modules/.bin/lab",
+            "args": [
+                "-m",
+                "0",
+                "lib/test"
+            ],
+            "preLaunchTask": "build",
+            "cwd": "${workspaceRoot}",
+            "sourceMaps": true,
+            "env": {
+                "NODE_ENV": "test"
+            }
+        }
+    ]
+}
