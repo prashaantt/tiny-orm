@@ -9,8 +9,6 @@ export function prop(schema?: SchemaType) {
             set: function (value: any) {
                 this._props = this._props || {};
                 this._props[key] = this._props[key] || {};
-                this._props[key].value = value;
-
                 if (schema) {
                     if (!this._props[key].schema) {
                         this._props[key].schema = schema;
@@ -22,6 +20,8 @@ export function prop(schema?: SchemaType) {
                         validate(value, schema, propName);
                     }
                 }
+
+                this._props[key].value = value;
             },
             enumerable: true
         });
