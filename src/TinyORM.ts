@@ -33,17 +33,17 @@ export class TinyORM<T> {
         return true;
     }
 
-    toObject(snakeCased = false) {
-        const obj = getObject(this._props);
-
-        if (snakeCased) {
-            return changeCaseDeep(obj, snakeCase) as T;
-        }
-
-        return obj as T;
+    toObject() {
+        return getObject(this._props) as T;
     }
 
-    toString(snakeCased = false) {
-        return JSON.stringify(this.toObject(snakeCased));
+    toDBObject() {
+        const obj = getObject(this._props);
+
+        return changeCaseDeep(obj, snakeCase);
+    }
+
+    toString() {
+        return JSON.stringify(this.toObject());
     }
 }
