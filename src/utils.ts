@@ -17,11 +17,11 @@ export function getObject(model: any) {
     const obj = {};
 
     for (let key in model) {
-        const column = model[key];
+        const _prop = model[key];
 
-        if (Array.isArray(column.value)) {
+        if (Array.isArray(_prop.value)) {
             Object.assign(obj, {
-                [key]: column.value.map((item: any) => {
+                [key]: _prop.value.map((item: any) => {
 
                     if (typeof item !== 'object') {
                         return item;
@@ -31,14 +31,14 @@ export function getObject(model: any) {
                 })
             });
         }
-        else if (typeof column.value === 'object') {
+        else if (typeof _prop.value === 'object') {
             Object.assign(obj, {
-                [key]: getObject(column.value)
+                [key]: getObject(_prop.value)
             });
         }
         else {
             Object.assign(obj, {
-                [key]: column.value || column
+                [key]: _prop.value || _prop
             });
         }
     }
@@ -65,10 +65,14 @@ export function changeCaseDeep(obj: any, fn: Function) {
             });
         }
         else if (typeof obj[key] === 'object') {
-            changeCaseDeep(obj[key], fn);
+            Object.assign(changedObj, {
+                [changedKeyCase]: changeCaseDeep(obj[key], fn)
+            });
         }
         else {
-            changedObj[changedKeyCase] = obj[key];
+            Object.assign(changedObj, {
+                [changedKeyCase]: obj[key]
+            });
         }
     }
 
