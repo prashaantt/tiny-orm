@@ -1,2 +1,2 @@
-export * from './BaseModel';
+export * from './TinyORM';
 export * from './decorators';

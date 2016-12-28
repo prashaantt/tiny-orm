@@ -6,7 +6,7 @@ interface Columns {
     [key: string]: { schema: SchemaType, value: any };
 }
 
-export class BaseModel<T> {
+export class TinyORM<T> {
     private _columns: Columns;
 
     constructor(model: T) {

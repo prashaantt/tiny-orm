@@ -1,6 +1,6 @@
 import { SchemaType, validate } from './utils';
 
-export function field(schema?: SchemaType) {
+export function prop(schema?: SchemaType) {
     return function (target: any, key: string) {
         Object.defineProperty(target, key, {
             get: function () {
