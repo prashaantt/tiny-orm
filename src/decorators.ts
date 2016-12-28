@@ -4,20 +4,22 @@ export function prop(schema?: SchemaType) {
     return function (target: any, key: string) {
         Object.defineProperty(target, key, {
             get: function () {
-                return this._columns[key].value;
+                return this._props[key].value;
             },
             set: function (value: any) {
-                this._columns = this._columns || {};
-                this._columns[key] = this._columns[key] || {};
-                this._columns[key].value = value;
+                this._props = this._props || {};
+                this._props[key] = this._props[key] || {};
+                this._props[key].value = value;
 
                 if (schema) {
-                    this._columns[key].schema = schema;
+                    if (!this._props[key].schema) {
+                        this._props[key].schema = schema;
+                    }
 
-                    if (this.strictValidation) {
-                        const propertyName = this.constructor.name + '.' + key;
+                    if (this.strictMode) {
+                        const propName = this.constructor.name + '.' + key;
 
-                        validate(value, schema, propertyName);
+                        validate(value, schema, propName);
                     }
                 }
             },
@@ -26,6 +28,6 @@ export function prop(schema?: SchemaType) {
     };
 }
 
-export function strict(ctr: Function) {
-    ctr.prototype.strictValidation = true;
+export function strict(constructor: Function) {
+    constructor.prototype.strictMode = true;
 }

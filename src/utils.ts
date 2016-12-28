@@ -2,10 +2,10 @@ import * as Joi from 'joi';
 
 export type SchemaType = Joi.AnySchema<Joi.Schema> | Joi.SchemaMap;
 
-export function validate(value: any, schema: SchemaType, propertyName: string) {
+export function validate(value: any, schema: SchemaType, propName: string) {
     Joi.validate(value, schema, (err) => {
         if (err) {
-            err.message = err.message.replace('"value"', `: ${propertyName}`);
+            err.message = err.message.replace('"value"', propName);
             throw err;
         }
     });
@@ -33,7 +33,7 @@ export function getObject(model: any) {
         }
         else if (typeof column.value === 'object') {
             Object.assign(obj, {
-                [key]: new this(getObject(column.value))
+                [key]: getObject(column.value)
             });
         }
         else {
@@ -47,13 +47,13 @@ export function getObject(model: any) {
 }
 
 export function changeCaseDeep(obj: any, fn: Function) {
-    const o = {} as any;
+    const changedObj = {} as any;
 
     for (let key in obj) {
         const changedKeyCase = fn(key);
 
         if (Array.isArray(obj[key])) {
-            Object.assign(o, {
+            Object.assign(changedObj, {
                 [changedKeyCase]: obj[key].map((item: any) => {
 
                     if (typeof item !== 'object') {
@@ -68,9 +68,9 @@ export function changeCaseDeep(obj: any, fn: Function) {
             changeCaseDeep(obj[key], fn);
         }
         else {
-            o[changedKeyCase] = obj[key];
+            changedObj[changedKeyCase] = obj[key];
         }
     }
 
-    return o;
+    return changedObj;
 }

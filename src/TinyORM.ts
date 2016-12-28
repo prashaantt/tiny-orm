@@ -2,12 +2,12 @@ import { camelCase, snakeCase } from 'change-case';
 
 import { changeCaseDeep, getObject, validate, SchemaType } from './utils';
 
-interface Columns {
+interface TinyProps {
     [key: string]: { schema: SchemaType, value: any };
 }
 
 export class TinyORM<T> {
-    private _columns: Columns;
+    private _props: TinyProps;
 
     constructor(model: T) {
         for (let key in model) {
@@ -22,11 +22,11 @@ export class TinyORM<T> {
     }
 
     validate() {
-        for (let key in this._columns) {
-            if (this._columns[key].schema) {
-                const propertyName = this.constructor.name + '.' + key;
+        for (let key in this._props) {
+            if (this._props[key].schema) {
+                const propName = this.constructor.name + '.' + key;
 
-                return validate(this._columns[key].value, this._columns[key].schema, propertyName);
+                return validate(this._props[key].value, this._props[key].schema, propName);
             }
         }
 
@@ -34,7 +34,7 @@ export class TinyORM<T> {
     }
 
     toObject(snakeCased = false) {
-        const obj = getObject(this._columns);
+        const obj = getObject(this._props);
 
         if (snakeCased) {
             return changeCaseDeep(obj, snakeCase) as T;
