@@ -9,9 +9,11 @@ interface TinyProps {
 export class TinyORM<T> {
     private _props: TinyProps;
 
-    constructor(model: T) {
-        for (let key in model) {
-            (<any>this)[key] = model[key];
+    constructor(model?: T) {
+        if (model) {
+            for (let key in model) {
+                (<any>this)[key] = model[key];
+            }
         }
     }
 
@@ -26,11 +28,9 @@ export class TinyORM<T> {
             if (this._props[key].schema) {
                 const propName = this.constructor.name + '.' + key;
 
-                return validate(this._props[key].value, this._props[key].schema, propName);
+                validate(this._props[key].value, this._props[key].schema, propName);
             }
         }
-
-        return true;
     }
 
     toObject() {

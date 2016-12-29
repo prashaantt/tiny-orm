@@ -11,55 +11,109 @@ const { suite, test } = lab;
 suite('The TinyORM base class', () => {
     test('derives a class that can be validated', (done) => {
 
-        interface ITest {
+        class User extends TinyORM<{}> {
+            @prop(Joi.number().min(1))
             id: number;
+
+            @prop(Joi.string().email())
+            email: string;
+
+            constructor(id: number, name: string) {
+                super();
+
+                this.id = id;
+                this.email = name;
+            }
         }
 
-        class Test extends TinyORM<ITest> implements ITest {
-            @prop(Joi.number().equal(1))
-            id: number;
-        }
+        const user = new User(0, 'test@example.com');
 
-        const test = new Test({ id: 1 });
+        assert(() => user.validate())
+            .throws(Error, 'User.id must be larger than or equal to 1');
 
-        assert(test.validate()).true();
+        user.id = 1;
 
-        test.id = 2;
-
-        assert(() => test.validate())
-            .throw(Error, 'Test.id must be one of [1]');
+        assert(() => user.validate()).not.throws();
 
         done();
     });
 
-    test('derives an auto-validating class in strict mode', (done) => {
-        interface ITest {
-            id: number;
-        }
+    test('derives a class that is auto-validated in strict mode', (done) => {
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
-            @prop(Joi.number().min(1).max(5))
+        class User extends TinyORM<{}> {
+            @prop(Joi.number().min(1))
             id: number;
 
-            someMethod() {
-                return this.id * 2;
+            @prop(Joi.string().email())
+            email: string;
+
+            constructor(id: number, name: string) {
+                super();
+
+                this.id = id;
+                this.email = name;
             }
         }
 
-        const test = new Test({ id: 1 });
-        assert(test.someMethod()).equals(2);
+        let user;
 
-        assert(() => { test.id = 6; })
-            .throw(Error, 'Test.id must be less than or equal to 5');
+        assert(() => { user = new User(1, 'test'); })
+            .throws(Error, 'User.email must be a valid email');
 
-        assert(test.id).equals(1);
+        assert(user).undefined();
+
+        assert(() => { user = new User(1, 'test@example.com'); }).not.throws();
+
+        assert(user).exists();
+
+        let message;
+
+        try {
+            (<any>user).id = 0;
+        }
+        catch (err) {
+            message = err.message;
+        }
+        finally {
+            assert(message).equals('User.id must be larger than or equal to 1');
+        }
+
+        assert((<any>user).id).equals(1);
+
+        done();
+    });
+
+    test('derives a class with strongly typed constructor arguments from a generic', (done) => {
+        interface IUser {
+            id: number;
+            email: string;
+        }
+
+        @strict
+        class User extends TinyORM<IUser> implements IUser {
+            @prop(Joi.number().min(1))
+            id: number;
+
+            @prop(Joi.string().email())
+            email: string;
+        }
+
+        const user = new User({
+            id: 1,
+            email: 'test@example.com'
+        });
+
+        assert(() => { user.id = 0; })
+            .throw(Error, 'User.id must be larger than or equal to 1');
+
+        assert(user.id).equals(1);
 
         done();
     });
 
     test('validates a multi-type property with complex schema', (done) => {
-        interface ITest {
+        interface IUser {
             id: number | string;
         }
 
@@ -69,7 +123,7 @@ suite('The TinyORM base class', () => {
         ];
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
+        class User extends TinyORM<IUser> implements IUser {
             @prop(complexSchema)
             id: number | string;
         }
@@ -77,8 +131,8 @@ suite('The TinyORM base class', () => {
         let error;
 
         try {
-            let test = new Test({ id: 'two' });
-            test.id = 2;
+            const user = new User({ id: 'two' });
+            user.id = 2;
         }
         catch (err) {
             error = err;
@@ -91,39 +145,41 @@ suite('The TinyORM base class', () => {
     });
 
     test('initialises from a random source and normalises props to camelCase', (done) => {
-        interface ITest {
-            id: number;
-            authorId: string;
+        interface IUser {
+            userGuid: string;
+            userEmail: string;
         }
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
-            @prop(Joi.number().min(1))
-            id: number;
+        class User extends TinyORM<IUser> implements IUser {
+            @prop(Joi.string().email())
+            userEmail: string;
 
             @prop(Joi.string().guid())
-            authorId: string;
+            userGuid: string;
         }
 
-        const author_id = '3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f';
+        const user_guid = '3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f';
+        const user_email = 'test@example.com';
 
-        const test = Test.getInstance({
-            id: 1,
-            author_id
-        }) as Test;
+        const test = User.getInstance({
+            user_email,
+            user_guid
+        }) as User;
 
-        assert(test.authorId).equal(author_id);
+        assert(test.userGuid).equals(user_guid);
+        assert(test.userEmail).equals(user_email);
 
         done();
     });
 
-    test('returns the valid decorated object', (done) => {
-        interface ITest {
+    test('returns valid decorated props through toObject', (done) => {
+        interface IUser {
             id: number;
         }
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
+        class User extends TinyORM<IUser> implements IUser {
             @prop(Joi.number().min(1).max(5))
             id: number;
 
@@ -132,71 +188,67 @@ suite('The TinyORM base class', () => {
             }
         }
 
-        const test = new Test({ id: 1 });
-        const obj = test.toObject();
+        const user = new User({ id: 1 });
+        const obj = user.toObject();
 
-        assert(obj.id).equals(test.id);
-        assert((<Test>obj).someMethod).undefined();
+        assert(obj.id).equals(user.id);
+        assert((<User>obj).someMethod).undefined();
 
         done();
     });
 
     test('returns a valid object with snake_cased props', (done) => {
-        interface ITest {
-            id: number;
-            authorId: string;
+        interface IUser {
+            userGuid: string;
+            userEmail: string;
         }
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
-            @prop(Joi.number().min(1))
-            id: number;
+        class User extends TinyORM<IUser> implements IUser {
+            @prop(Joi.string().email())
+            userEmail: string;
 
             @prop(Joi.string().guid())
-            authorId: string;
+            userGuid: string;
         }
 
-        const author_id = '3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f';
-
-        const test = new Test({
-            id: 1,
-            authorId: author_id
+        const user = new User({
+            userGuid: '3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f',
+            userEmail: 'test@example.com'
         });
 
-        const camelCasedTest = test.toDBObject();
-        assert(camelCasedTest.author_id).equals(author_id);
-        assert(camelCasedTest.authorId).undefined();
+        const camelCasedTest = user.toDBObject();
+        assert(camelCasedTest.user_guid).equals(user.userGuid);
+        assert(camelCasedTest.userGuid).undefined();
+        assert(camelCasedTest.user_email).equals(user.userEmail);
+        assert(camelCasedTest.userEmail).undefined();
 
         done();
     });
 
     test('returns the stringified object', (done) => {
-        interface ITest {
+        interface IUser {
             id: number;
-            authorId: string;
+            email: string;
         }
 
         @strict
-        class Test extends TinyORM<ITest> implements ITest {
+        class User extends TinyORM<IUser> implements IUser {
             @prop(Joi.number().min(1))
             id: number;
 
-            @prop(Joi.string().guid())
-            authorId: string;
+            @prop(Joi.string().email())
+            email: string;
         }
 
-        const author_id = '3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f';
-
-        const test = new Test({
+        const test = new User({
             id: 1,
-            authorId: author_id
+            email: 'test@example.com'
         });
 
-        const testStr = '{"id":1,"authorId":"3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f"}';
-        const testStrSnake = '{"id":1,"author_id":"3ed44ac2-4dd8-4a2a-9aaa-879e4a44148f"}';
+        const testStr = '{"id":1,"email":"test@example.com"}';
 
         assert(test.toString()).equals(testStr);
-        assert(JSON.stringify(test.toDBObject())).equals(testStrSnake);
 
         done();
     });

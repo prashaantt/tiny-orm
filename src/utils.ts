@@ -9,8 +9,6 @@ export function validate(value: any, schema: SchemaType, propName?: string) {
             throw err;
         }
     });
-
-    return true;
 }
 
 export function getObject(model: any) {
