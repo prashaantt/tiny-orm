@@ -1,11 +1,10 @@
-import * as Code from 'code';
+import { expect as assert } from 'code';
 import * as Joi from 'joi';
 import { script } from 'lab';
 
 import { prop, strict } from '../src';
 
 const lab = exports.lab = script();
-const assert = Code.expect;
 const { suite, test } = lab;
 
 suite('The strict decorator', () => {
@@ -19,7 +18,7 @@ suite('The strict decorator', () => {
 
         assert((<any>new MyClass()).strictMode).equals(true);
 
-        return done();
+        done();
     });
 });
 
@@ -58,16 +57,10 @@ suite('The prop decorator', () => {
 
         let error = false;
 
-        try {
-            instance.numberPretendingToBeString = 'abc';
-        }
-        catch (err) {
-            error = true;
-        }
-        finally {
-            assert(error).equals(false);
-            done();
-        }
+        assert(() => { instance.numberPretendingToBeString = 'abc'; })
+            .not.throws();
+
+        done();
     });
 
     test('validates correctly if strict is enabled', (done) => {
@@ -84,29 +77,9 @@ suite('The prop decorator', () => {
         prop(Joi.number())(instance, 'numberPretendingToBeString');
         prop(Joi.number().min(1).max(10))(instance, 'numberBetweenOneAndTen');
 
-        let error = false;
+        assert(() => { instance.numberPretendingToBeString = 'abc'; }).throws();
 
-        try {
-            instance.numberPretendingToBeString = 'abc';
-        }
-        catch (err) {
-            error = true;
-        }
-        finally {
-            assert(error).equals(true);
-        }
-
-        error = false;
-
-        try {
-            instance.numberBetweenOneAndTen = 10;
-        }
-        catch (err) {
-            error = true;
-        }
-        finally {
-            assert(error).equals(false);
-        }
+        assert(() => { instance.numberBetweenOneAndTen = 10; }).not.throws();
 
         done();
     });
