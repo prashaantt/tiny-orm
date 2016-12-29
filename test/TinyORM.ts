@@ -217,7 +217,7 @@ suite('The TinyORM base class', () => {
             userEmail: 'test@example.com'
         });
 
-        const camelCasedTest = user.toDBObject();
+        const camelCasedTest = user.toDbObject();
         assert(camelCasedTest.user_guid).equals(user.userGuid);
         assert(camelCasedTest.userGuid).undefined();
         assert(camelCasedTest.user_email).equals(user.userEmail);

@@ -37,7 +37,7 @@ export class TinyORM<T> {
         return getObject(this._props) as T;
     }
 
-    toDBObject() {
+    toDbObject() {
         const obj = getObject(this._props);
 
         return changeCaseDeep(obj, snakeCase);
