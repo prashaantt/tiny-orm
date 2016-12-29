@@ -1,4 +1,4 @@
-import * as Code from 'code';
+import { expect as assert } from 'code';
 import * as Joi from 'joi';
 import { script } from 'lab';
 import { camelCase, snakeCase } from 'change-case';
@@ -7,39 +7,19 @@ import { prop } from '../src';
 import { validate, getObject, changeCaseDeep } from '../src/utils';
 
 const lab = exports.lab = script();
-const assert = Code.expect;
 const { suite, test } = lab;
 
 suite('The validate function', () => {
     test('validates correctly', (done) => {
-        let message;
+        assert(() => validate(5, Joi.number().min(1).max(5), 'MyClass.someProp')).not.throws();
 
-        try {
-            validate(5, Joi.number().min(1).max(5), 'MyClass.someProp');
-        }
-        catch (err) {
-            message = err.message;
-        }
-        finally {
-            assert(message).undefined();
-            done();
-        }
+        done();
     });
 
     test('reports correct message on error', (done) => {
-        let message;
+        assert(() => validate(6, Joi.number().min(1).max(5), 'MyClass.someProp')).throws(Error);
 
-        try {
-            validate(6, Joi.number().min(1).max(5), 'MyClass.someProp');
-        }
-        catch (err) {
-            message = err.message;
-        }
-        finally {
-            assert(message).exists();
-            assert(message).startsWith('MyClass.someProp');
-            done();
-        }
+        done();
     });
 });
 

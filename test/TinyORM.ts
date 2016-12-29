@@ -1,4 +1,4 @@
-import * as Code from 'code';
+import { expect as assert } from 'code';
 import * as Joi from 'joi';
 import { script } from 'lab';
 import { camelCase, snakeCase } from 'change-case';
@@ -6,7 +6,6 @@ import { camelCase, snakeCase } from 'change-case';
 import { TinyORM, prop, strict } from '../src';
 
 const lab = exports.lab = script();
-const assert = Code.expect;
 const { suite, test } = lab;
 
 suite('The TinyORM base class', () => {
@@ -24,6 +23,11 @@ suite('The TinyORM base class', () => {
         const test = new Test({ id: 1 });
 
         assert(test.validate()).true();
+
+        test.id = 2;
+
+        assert(() => test.validate())
+            .throw(Error, 'Test.id must be one of [1]');
 
         done();
     });
@@ -46,20 +50,42 @@ suite('The TinyORM base class', () => {
         const test = new Test({ id: 1 });
         assert(test.someMethod()).equals(2);
 
-        let message;
-
-        try {
-            test.id = 6;
-        }
-        catch (err) {
-            message = err.message;
-        }
-        finally {
-            assert(message).exists();
-            assert(message).startsWith('Test.id');
-        }
+        assert(() => { test.id = 6; })
+            .throw(Error, 'Test.id must be less than or equal to 5');
 
         assert(test.id).equals(1);
+
+        done();
+    });
+
+    test('validates a multi-type property with complex schema', (done) => {
+        interface ITest {
+            id: number | string;
+        }
+
+        const complexSchema = [
+            Joi.number().min(1).max(3),
+            Joi.string().valid('one', 'two', 'three')
+        ];
+
+        @strict
+        class Test extends TinyORM<ITest> implements ITest {
+            @prop(complexSchema)
+            id: number | string;
+        }
+
+        let error;
+
+        try {
+            let test = new Test({ id: 'two' });
+            test.id = 2;
+        }
+        catch (err) {
+            error = err;
+        }
+        finally {
+            assert(error).undefined();
+        }
 
         done();
     });
@@ -171,6 +197,7 @@ suite('The TinyORM base class', () => {
 
         assert(test.toString()).equals(testStr);
         assert(JSON.stringify(test.toDBObject())).equals(testStrSnake);
+
         done();
     });
 });

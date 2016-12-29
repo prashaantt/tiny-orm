@@ -1,11 +1,11 @@
 import * as Joi from 'joi';
 
-export type SchemaType = Joi.AnySchema<Joi.Schema> | Joi.SchemaMap;
+export type SchemaType = Joi.AnySchema<Joi.Schema> | Joi.SchemaMap | Joi.AnySchema<Joi.Schema>[];
 
-export function validate(value: any, schema: SchemaType, propName: string) {
+export function validate(value: any, schema: SchemaType, propName?: string) {
     Joi.validate(value, schema, (err) => {
         if (err) {
-            err.message = err.message.replace('"value"', propName);
+            err.message = propName ? err.message.replace(/"value"/g, propName) : err.message;
             throw err;
         }
     });
