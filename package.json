@@ -1,6 +1,6 @@
 {
   "name": "tiny-orm",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A super tiny ORM for TypeScript.",
   "main": "lib/index.js",
   "typings": "lib/index",
@@ -27,7 +27,7 @@
     "typescript": "^2.1.4"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "rm -r lib && tsc",
     "compile": "tsc --noEmit",
     "lint": "tslint -c tslint.json  './{src,test}/**/*.ts'",
     "test": "lab -T test/test-transform.js"
