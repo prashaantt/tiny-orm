@@ -26,7 +26,8 @@ export class TinyORM<T> {
     validate() {
         for (let key in this._props) {
             if (this._props[key].schema) {
-                const propName = this.constructor.name + '.' + key;
+                const className = (this.constructor as any).name;
+                const propName = className ? className + '.' + key : key;
 
                 validate(this._props[key].value, this._props[key].schema, propName);
             }

@@ -58,7 +58,6 @@ suite('The changeCaseDeep function', () => {
         };
 
         let transformedObj = changeCaseDeep(camelCasedObj, snakeCase);
-        assert(camelCasedObj).equals(camelCasedObj);
         assert(transformedObj).equals(snakeCased);
 
         transformedObj = changeCaseDeep(transformedObj, camelCase);

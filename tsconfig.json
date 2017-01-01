@@ -1,13 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs",
-        "target": "es6",
+        "target": "es5",
         "noImplicitAny": true,
         "strictNullChecks": true,
         "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "inlineSourceMap": true,
         "outDir": "lib",
-        "declaration": true
+        "declaration": true,
+        "alwaysStrict": true
     }
 }
