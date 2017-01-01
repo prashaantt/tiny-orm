@@ -12,14 +12,14 @@ export function validate(value: any, schema: SchemaType, propName?: string) {
 }
 
 export function getObject(model: any) {
-    const obj = {};
+    let obj = {};
 
     for (let key in model) {
         const _prop = model[key];
 
         if (Array.isArray(_prop.value)) {
-            Object.assign(obj, {
-                [key]: _prop.value.map((item: any) => {
+            obj = {
+                ...obj, [key]: _prop.value.map((item: any) => {
 
                     if (typeof item !== 'object') {
                         return item;
@@ -27,17 +27,17 @@ export function getObject(model: any) {
 
                     return getObject(item);
                 })
-            });
+            };
         }
         else if (typeof _prop.value === 'object') {
-            Object.assign(obj, {
-                [key]: getObject(_prop.value)
-            });
+            obj = {
+                ...obj, [key]: getObject(_prop.value)
+            };
         }
         else {
-            Object.assign(obj, {
-                [key]: _prop.value || _prop
-            });
+            obj = {
+                ...obj, [key]: _prop.value || _prop
+            };
         }
     }
 
@@ -45,14 +45,14 @@ export function getObject(model: any) {
 }
 
 export function changeCaseDeep(obj: any, fn: Function) {
-    const changedObj = {} as any;
+    let changedObj = {};
 
     for (let key in obj) {
         const changedKeyCase = fn(key);
 
         if (Array.isArray(obj[key])) {
-            Object.assign(changedObj, {
-                [changedKeyCase]: obj[key].map((item: any) => {
+            changedObj = {
+                ...changedObj, [changedKeyCase]: obj[key].map((item: any) => {
 
                     if (typeof item !== 'object') {
                         return item;
@@ -60,17 +60,17 @@ export function changeCaseDeep(obj: any, fn: Function) {
 
                     return changeCaseDeep(item, fn);
                 })
-            });
+            };
         }
         else if (typeof obj[key] === 'object') {
-            Object.assign(changedObj, {
-                [changedKeyCase]: changeCaseDeep(obj[key], fn)
-            });
+            changedObj = {
+                ...changedObj, [changedKeyCase]: changeCaseDeep(obj[key], fn)
+            };
         }
         else {
-            Object.assign(changedObj, {
-                [changedKeyCase]: obj[key]
-            });
+            changedObj = {
+                ...changedObj, [changedKeyCase]: obj[key]
+            };
         }
     }
 
